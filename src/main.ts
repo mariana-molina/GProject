@@ -6,7 +6,7 @@ type State = {
 };
 
 let state: State = {
-	searchHistory: [''],
+	searchHistory: ['apple', 'apple watch', 'apple macbook', 'apple macbook pro'],
 	currentSearch: 'cat',
 };
 
@@ -23,7 +23,9 @@ const htmlSearch = document.getElementById('searchButton') as HTMLButtonElement;
 htmlSearch.addEventListener('click', () => {
 	const searchInput = document.getElementById('searchText') as HTMLInputElement;
 	const textValue = searchInput.value;
-	state.searchHistory.push(textValue);
+	if (!state.searchHistory.includes(textValue)) {
+		state.searchHistory.push(textValue);
+	}
 	update({ searchHistory: state.searchHistory, currentSearch: textValue });
 });
 
@@ -75,24 +77,58 @@ const addtoDom = async () => {
 	});
 };
 
-const searchSuggestion = () => {
-	const suggestionsElement = document.getElementById('searchText');
-	suggestionsElement?.addEventListener('focus', () => {
-		const ulElement = document.getElementById(
-			'suggestionList'
-		) as HTMLUListElement;
-		ulElement.innerHTML = '';
-		state.searchHistory.forEach(item => {
-			const liElement = document.createElement('li');
-			liElement.innerHTML = item;
-			ulElement.append(liElement);
-		});
+// const searchSuggestion = () => {
+// 	const suggestionsElement = document.getElementById('searchText');
+// 	suggestionsElement?.addEventListener('click', () => {
+// 		// const ulElement = document.getElementById('suggestionList') as HTMLUListElement;
+// 		// ulElement.innerHTML = '';
+// 		// state.searchHistory.forEach(item => {
+// 		// 	const liElement = document.createElement('li');
+// 			// liElement.innerHTML = item;
+// 			// ulElement.append(liElement);
+// 		// });
+// 	});
+// };
+// searchSuggestion();
+
+const autocompleteMatch = (input: string) => {
+	if (input == '') {
+		return [];
+	}
+	const reg = new RegExp(input);
+	let searchHistory = state.searchHistory as string[];
+	return searchHistory.filter(term => {
+		if (term.match(reg)) {
+			return term;
+		}
+		return 'No match yet.';
 	});
 };
-searchSuggestion();
+
+const showResults = (val: string) => {
+	console.log(val, 'showResults is running');
+	const res = document.getElementById('suggestionList') as HTMLInputElement;
+	res.innerHTML = '';
+	let list = '';
+	let terms = autocompleteMatch(val);
+	for (let i = 0; i < terms.length; i++) {
+		list += '<li>' + terms[i] + '</li>';
+	}
+	res.innerHTML = '<ul>' + list + '</ul>';
+};
 
 window.addEventListener('statechange', () => {
 	addtoDom();
 });
 
-export default {};
+const recording = () => {
+	console.log('running');
+};
+
+const inputSearch = document.getElementById('searchText');
+inputSearch?.addEventListener('keyUp', () => {
+	console.log('running!!!!');
+});
+console.log('added', inputSearch);
+
+export default { showResults, recording };
